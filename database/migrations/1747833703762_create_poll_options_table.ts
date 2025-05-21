@@ -1,12 +1,13 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'polls'
+  protected tableName = 'poll_options'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
-      table.string('title')
+      table.integer('poll_id')
+      table.string('text')
       table.timestamp('created_at')
       table.timestamp('updated_at')
     })
