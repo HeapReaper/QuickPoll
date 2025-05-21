@@ -1,9 +1,124 @@
-@layout.app({ title: "Welcome page title" })
+@layout.app({ title: "QuickPoll" })
   @slot('meta')
     <meta name="description" content="A welcome page made with EdgeJS">
   @endslot
 
   @slot('main')
-    <h1>Hello world</h1>
+    <section class="text-center py-24 px-4">
+      <h2 class="text-4xl md:text-5xl font-extrabold mb-6 text-white">Create and Share Polls Instantly</h2>
+      <p class="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+        QuickPoll makes it easy to ask questions and get answers in real-time. No account needed. Just create, share, and see results.
+      </p>
+
+      <div x-data="{ open: false }">
+        <a @click="open = true" class="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition cursor-pointer">
+          Create a Poll
+        </a>
+
+        <span x-show="open">
+          <template x-if="open">
+            <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+              <div class="bg-gray-900 text-white p-8 rounded-xl w-full max-w-xl relative">
+                <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
+
+                <h3 class="text-2xl font-bold mb-4">Create a New Poll</h3>
+
+                <form method="POST" action="polls-store">
+                  {{ csrfField() }}
+                  <div class="mb-4">
+                    <label class="block mb-1">Poll Question</label>
+                    <input type="text" name="name" class="w-full p-2 rounded bg-gray-800 border border-gray-700" placeholder="Do you like bananananas?" required>
+                  </div>
+
+                  <div class="mb-4" x-data="{ options: [''] }">
+                    <label class="block mb-1">Options</label>
+
+                    <template x-for="(option, index) in options" :key="index">
+                      <div class="flex items-center space-x-2 mb-2">
+                        <input
+                          type="text"
+                          :name="`options[]`"
+                          x-model="options[index]"
+                          class="w-full p-2 rounded bg-gray-800 border border-gray-700"
+                          :placeholder="`Option ${index + 1}`"
+                          required
+                        />
+                        <button
+                          type="button"
+                          @click="options.splice(index, 1)"
+                          class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                          x-show="options.length > 1"
+                        >
+                          &minus;
+                        </button>
+                      </div>
+                    </template>
+
+                    <button
+                      type="button"
+                      @click="options.push('')"
+                      class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <div class="text-right">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white font-semibold">Submit Poll</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </template>
+        </span>
+      </div>
+    </section>
+
+    <section class="max-w-3xl mx-auto px-4 mb-20">
+      <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+        <h3 class="text-2xl font-semibold text-blue-400 mb-4">Poll Preview</h3>
+        <p class="mb-6 text-gray-300">What's your favorite frontend framework?</p>
+        <div class="space-y-3">
+          <div class="bg-gray-700 rounded-lg overflow-hidden">
+            <div class="bg-blue-500 text-white px-4 py-2 w-2/5">React (40%)</div>
+          </div>
+          <div class="bg-gray-700 rounded-lg overflow-hidden">
+            <div class="bg-blue-400 text-white px-4 py-2 w-1/4">Vue (25%)</div>
+          </div>
+          <div class="bg-gray-700 rounded-lg overflow-hidden">
+            <div class="bg-blue-300 text-white px-4 py-2 w-1/3">Svelte (33%)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div x-data="{ open: false }">
+      <template x-if="open">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div class="bg-gray-900 text-white p-8 rounded-xl w-full max-w-xl relative">
+            <button @click="open = false" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">&times;</button>
+
+            <h3 class="text-2xl font-bold mb-4">Create a New Poll</h3>
+
+            <form method="POST" action="/polls">
+              @csrf
+              <div class="mb-4">
+                <label class="block mb-1">Poll Question</label>
+                <input type="text" name="question" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+              </div>
+
+              <div class="mb-4">
+                <label class="block mb-1">Options (comma separated)</label>
+                <input type="text" name="options" class="w-full p-2 rounded bg-gray-800 border border-gray-700" placeholder="Option 1, Option 2, Option 3" required>
+              </div>
+
+              <div class="text-right">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded text-white font-semibold">Submit Poll</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </template>
+    </div>
   @endslot
 @end

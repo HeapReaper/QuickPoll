@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 import adonisjs from '@adonisjs/vite/client'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     adonisjs({
       /**
        * Entrypoints of your application. Each entrypoint will
@@ -13,7 +15,7 @@ export default defineConfig({
       /**
        * Paths to watch and reload the browser on file change
        */
-      reload: ['resources/views/**/*.edge'],
+      reload: ['resources/views/**/*.edge', 'resources/css/app.css', 'resources/js/app.js'],
     }),
   ],
 })
