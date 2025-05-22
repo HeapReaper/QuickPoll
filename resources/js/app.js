@@ -38,7 +38,7 @@ async function initSubscription() {
   })
 }
 
-void initSubscription()
+initSubscription().catch((err) => console.error(err))
 
 document.querySelectorAll('form[data-option-id]').forEach((form) => {
   form.addEventListener('submit', async (e) => {
