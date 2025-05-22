@@ -152,6 +152,7 @@ export default class PollsController {
       pollId,
       pollName: poll.name,
       totalVotes,
+      optionId,
       options: optionsWithPercentage,
     })
   }
