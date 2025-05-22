@@ -14,4 +14,4 @@ RUN npm prune --production
 
 EXPOSE 3333
 
-CMD ["node", "build/server.js"]
+CMD ["node", "build/bin/server.js"]
