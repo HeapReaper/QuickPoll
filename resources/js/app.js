@@ -90,7 +90,7 @@ function updatePollUI(message) {
 
     const textEl = optionEl.querySelector('.poll-label')
     if (textEl) {
-      textEl.textContent = `${option.name} (${option.percentage}%)`
+      textEl.textContent = `${option.name} (${option.percentage}%) / ${ option.count } vote(s)`
     }
   })
 }
