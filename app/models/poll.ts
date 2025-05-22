@@ -1,13 +1,14 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
+import Option from '#models/option'
 
 export default class Poll extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  public id!: number
 
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  @column()
+  public name!: string
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  @hasMany(() => Option)
+  public options!: HasMany<typeof Option>
 }

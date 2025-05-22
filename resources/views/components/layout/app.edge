@@ -17,6 +17,17 @@
       </nav>
     </header>
 
+    @if(flashMessages.success)
+    <div
+      x-data="{ show: true }"
+      x-show="show"
+      x-init="setTimeout(() => show = false, 4000)"
+      class="bg-green-600 text-white p-4 rounded mb-6 max-w-xl mx-auto text-center"
+    >
+      {{ flashMessages.success }}
+    </div>
+    @endif
+
     <div class="flex-grow">
       {{{ await $slots.main() }}}
     </div>
