@@ -138,6 +138,7 @@ export default class PollsController {
     transmit.broadcast('poll-updated', {
       pollId,
       pollName: poll.name,
+      totalVotes,
       options: optionsWithPercentage,
     })
 
