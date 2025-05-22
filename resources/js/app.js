@@ -22,13 +22,14 @@ export const transmit = new Transmit({
 })
 
 async function initSubscription() {
+  console.log('Creating subscription...')
   const subscription = transmit.subscription('poll-updated')
 
   try {
     await subscription.create()
     console.log('WebSocket subscription created')
   } catch (err) {
-    console.error('Failed to create subscription:', err)
+    console.error('Failed to create WebSocket subscription:', err)
   }
 
   subscription.onMessage((message) => {
