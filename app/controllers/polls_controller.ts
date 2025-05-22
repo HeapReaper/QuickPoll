@@ -148,6 +148,11 @@ export default class PollsController {
     })
 
     session.flash('success', 'Your vote has been updated!')
-    return response.redirect().back()
+    return response.json({
+      pollId,
+      pollName: poll.name,
+      totalVotes,
+      options: optionsWithPercentage,
+    })
   }
 }
