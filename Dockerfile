@@ -10,10 +10,8 @@ COPY . .
 
 RUN npm run build
 
-RUN node ace migration:run --force
-
 RUN npm prune --production
 
 EXPOSE 3333
 
-CMD ["node", "build/bin/server.js"]
+CMD ["sh", "-c", "node ace migration:run --force && node build/bin/server.js"]

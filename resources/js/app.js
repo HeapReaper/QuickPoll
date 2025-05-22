@@ -18,7 +18,7 @@ export default {
 }
 
 export const transmit = new Transmit({
-  baseUrl: window.location.origin,
+  baseUrl: window.location.origin.replace(/^http/, 'ws'), // 'https' → 'wss'
 })
 
 async function initSubscription() {
@@ -36,7 +36,6 @@ async function initSubscription() {
     console.log('Received message over WebSocket:', message)
     updatePollUI(message)
   })
-
 }
 
 void initSubscription()
