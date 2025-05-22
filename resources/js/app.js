@@ -22,18 +22,15 @@ export const transmit = new Transmit({
 })
 
 async function initSubscription() {
-  console.log('Creating subscription...')
   const subscription = transmit.subscription('poll-updated')
 
   try {
     await subscription.create()
-    console.log('WebSocket subscription created')
   } catch (err) {
     console.error('Failed to create WebSocket subscription:', err)
   }
 
   subscription.onMessage((message) => {
-    console.log('Received message over WebSocket:', message)
     updatePollUI(message)
   })
 }
@@ -61,11 +58,8 @@ document.querySelectorAll('form[data-option-id]').forEach((form) => {
       throw new Error('Failed to vote')
     }
 
-    // Assume server returns updated poll state in response JSON
-    const updatedPoll = await response.json()
+    await response.json()
 
-    // Update UI immediately
-    updatePollUI(updatedPoll)
     console.log('updatePollUI')
   } catch (error) {
     console.error(error)
