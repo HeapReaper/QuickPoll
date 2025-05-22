@@ -1,8 +1,11 @@
-<h1>
-  {{ error.code }} - Server error
-</h1>
-<p>
-  This template is rendered by the
-  <a href="http://docs.adonisjs.com/guides/exception-handling#status-pages">status pages feature</a>
-  of the global exception handler.
-</p>
+@layout.app({ title: "Server error..." })
+  @slot('meta')
+    <meta name="description" content="Server error...">
+  @endslot
+
+  @slot('main')
+    <section class="text-center py-24 px-4">
+      <h2 class="text-4xl md:text-5xl font-extrabold mb-6 text-white">Server error</h2>
+    </section>
+  @endslot
+@end
