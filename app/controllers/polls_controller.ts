@@ -1,4 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import transmit from '@adonisjs/transmit/services/main'
 import Poll from '#models/poll'
 import Vote from '#models/vote'
 
@@ -32,6 +33,8 @@ export default class PollsController {
         options: optionsWithPercentage,
       }
     })
+
+    transmit.broadcast('global', { message: 'Hello' })
 
     return view.render('pages/create', { polls: latestPolls })
   }
@@ -106,6 +109,37 @@ export default class PollsController {
 
     newVote.count += 1
     await newVote.save()
+
+    // TODO: Fix duplicate code
+    const poll: Poll = await Poll.query()
+      .where('id', pollId)
+      .preload('options', (query) => {
+        query.preload('vote')
+      })
+      .firstOrFail()
+
+    const totalVotes: number = poll.options.reduce(
+      (sum, option) => sum + (option.vote?.count ?? 0),
+      0
+    )
+
+    const optionsWithPercentage = poll.options.map((option) => {
+      const count: number = option.vote?.count ?? 0
+      const percentage: number = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
+
+      return {
+        id: option.id,
+        name: option.name,
+        count,
+        percentage,
+      }
+    })
+
+    transmit.broadcast('poll-updated', {
+      pollId,
+      pollName: poll.name,
+      options: optionsWithPercentage,
+    })
 
     response.cookie(`voted_poll_${pollId}`, optionId, {
       httpOnly: true,
