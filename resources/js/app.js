@@ -1,6 +1,22 @@
 import { Transmit } from '@adonisjs/transmit-client'
 import { Alpine } from 'alpinejs'
 
+window.Alpine = Alpine
+Alpine.start()
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    './resources/views/**/*.edge',
+    './resources/js/**/*.js',
+    './resources/js/**/*.ts',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+
 export const transmit = new Transmit({
   baseUrl: window.location.origin,
 })
@@ -42,18 +58,29 @@ async function initSubscription() {
 
 void initSubscription()
 
-window.Alpine = Alpine
-Alpine.start()
+document.querySelectorAll('form[data-option-id]').forEach((form) => {
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    './resources/views/**/*.edge',
-    './resources/js/**/*.js',
-    './resources/js/**/*.ts',
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
+    const action = form.action;
+    const csrfToken = form.querySelector('input[name="_csrf"]')?.value;
+
+    try {
+      const response = await fetch(action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to vote');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Something went wrong submitting your vote.');
+    }
+  });
+});
