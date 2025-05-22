@@ -18,7 +18,7 @@ export default {
 }
 
 export const transmit = new Transmit({
-  baseUrl: window.location.origin.replace(/^http/, 'ws'), // 'https' → 'wss'
+  baseUrl: window.location.origin,
 })
 
 async function initSubscription() {
