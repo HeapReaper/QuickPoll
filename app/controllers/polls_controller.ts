@@ -22,18 +22,18 @@ export default class PollsController {
   }
 
   async show({ params, view }: HttpContext) {
-    const poll = await Poll.query()
+    const poll: Poll = await Poll.query()
       .where('id', params.id)
       .preload('options', (query) => {
         query.preload('vote')
       })
       .firstOrFail()
 
-    const totalVotes = poll.options.reduce((sum, option) => sum + (option.vote?.count ?? 0), 0)
+    const totalVotes: number = poll.options.reduce((sum, option) => sum + (option.vote?.count ?? 0), 0)
 
     const optionsWithPercentage = poll.options.map(option => {
-      const count = option.vote?.count ?? 0
-      const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
+      const count: number = option.vote?.count ?? 0
+      const percentage: number = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
 
       return {
         id: option.id,
