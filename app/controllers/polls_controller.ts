@@ -36,7 +36,7 @@ export default class PollsController {
 
     transmit.broadcast('global', { message: 'Hello' })
 
-    return view.render('pages/create', { polls: latestPolls })
+    return view.render('pages/index', { polls: latestPolls })
   }
 
   async store({ request, response, session }: HttpContext) {

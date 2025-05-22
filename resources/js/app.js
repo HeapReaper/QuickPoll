@@ -80,17 +80,14 @@ function updatePollUI(message) {
 
     const barEl = optionEl.querySelector('.poll-bar')
     if (barEl) {
-      if (option.percentage > 0) {
-        barEl.style.width = `${option.percentage}%`
-        barEl.style.display = 'block'
-      } else {
-        barEl.style.display = 'none'
-      }
+      barEl.style.display = option.count > 0 ? 'block' : 'none'
+      barEl.style.width = option.count > 0 ? `${option.percentage}%` : '0'
     }
 
     const textEl = optionEl.querySelector('.poll-label')
     if (textEl) {
-      textEl.textContent = `${option.name} (${option.percentage}%) / ${ option.count } vote(s)`
+      textEl.textContent = `${option.name} (${option.percentage}%) / ${option.count} vote(s)`
     }
   })
 }
+

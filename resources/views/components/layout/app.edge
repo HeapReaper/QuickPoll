@@ -1,28 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title || "Your default title" }}</title>
-  @if ($slots.meta)
-  {{{ await $slots.meta() }}}
-  @endif
-</head>
-<body class="font-sans bg-gray-900 text-white flex flex-col min-h-screen">
-<!-- TODO: Place navbar in its own file? -->
-<header class="flex flex-wrap items-center justify-between p-4 md:p-6 bg-gray-800 shadow-md">
-  <a href="/" class="text-2xl font-bold text-blue-400 hover:text-blue-300">QuickPoll</a>
-</header>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title || "Your default title" }}</title>
+    @if ($slots.meta)
+    {{{ await $slots.meta() }}}
+    @endif
+  </head>
+  <body class="font-sans bg-gray-900 text-white flex flex-col min-h-screen">
+    <!-- TODO: Place navbar in its own file? -->
+    <header class="flex flex-wrap items-center justify-between p-4 md:p-6 bg-gray-800 shadow-md">
+      <a href="/" class="flex items-center space-x-2 text-2xl font-bold text-blue-400 hover:text-blue-500">
+        <img src="/poll.png" alt="QuickPoll Logo" class="h-8 w-8">
+        <span>QuickPoll</span>
+      </a>
+    </header>
 
-<main class="flex-grow">
-  {{{ await $slots.main() }}}
-</main>
 
-<!-- TODO: Place footer in its own file? -->
-<footer class="text-center text-sm text-gray-500 py-6 border-t border-gray-700">
-  &copy; {{ new Date().getFullYear() }} QuickPoll. All rights reserved.
-</footer>
+    <main class="flex-grow">
+      {{{ await $slots.main() }}}
+    </main>
 
-@vite(['resources/css/app.css', 'resources/js/app.js'])
-</body>
+    <!-- TODO: Place footer in its own file? -->
+    <footer class="text-center text-sm text-gray-500 py-6 border-t border-gray-700">
+      &copy; {{ new Date().getFullYear() }} QuickPoll. All rights reserved.
+    </footer>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+  </body>
 </html>
