@@ -1,16 +1,17 @@
-FROM node:20-alpine
+FROM node:20
 
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --production
+
+RUN npm ci
 
 COPY . .
 
 RUN npm run build
 
+RUN npm prune --production
+
 EXPOSE 3333
 
-ENV NODE_ENV=production
-
-CMD ["node", "build/server.js"]
+CMD ["node", "server.js"]
