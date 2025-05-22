@@ -23,10 +23,16 @@ export const transmit = new Transmit({
 
 async function initSubscription() {
   const subscription = transmit.subscription('poll-updated')
-  await subscription.create()
+
+  try {
+    await subscription.create()
+    console.log('WebSocket subscription created')
+  } catch (err) {
+    console.error('Failed to create subscription:', err)
+  }
 
   subscription.onMessage((message) => {
-    console.log(`Poll updated`)
+    console.log('Received message over WebSocket:', message)
     updatePollUI(message)
   })
 
