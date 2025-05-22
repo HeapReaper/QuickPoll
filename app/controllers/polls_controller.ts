@@ -1,17 +1,13 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Poll from '#models/poll'
 import Vote from '#models/vote'
-import session from '#config/session'
 
 export default class PollsController {
   async index({ view }: HttpContext) {
-    return view.render('pages/poll')
+    return view.render('pages/create')
   }
 
-  async create({}: HttpContext) {
-  }
-
-  async store({ request }: HttpContext) {
+  async store({ request, response, session }: HttpContext) {
     const { name, options } = request.only(['name', 'options'])
 
     const poll = await Poll.create({ name })
@@ -21,15 +17,38 @@ export default class PollsController {
       await Vote.create({ optionId: option.id, count: 0 })
     }
 
-    session.flash('success', 'Poll created successfully!')
-    return response.redirect().back()
+    session.flash('success', "Poll created successfully! Share the URL with you're fwends!")
+    return response.redirect(`/poll/${poll.id}`)
   }
 
-  async show({ params }: HttpContext) {}
+  async show({ params, view }: HttpContext) {
+    const poll = await Poll.query()
+      .where('id', params.id)
+      .preload('options', (query) => {
+        query.preload('vote')
+      })
+      .firstOrFail()
 
-  async edit({ params }: HttpContext) {}
+    const totalVotes = poll.options.reduce((sum, option) => sum + (option.vote?.count ?? 0), 0)
 
-  async update({ params, request }: HttpContext) {}
+    const optionsWithPercentage = poll.options.map(option => {
+      const count = option.vote?.count ?? 0
+      const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
 
-  async destroy({ params }: HttpContext) {}
+      return {
+        id: option.id,
+        name: option.name,
+        count,
+        percentage,
+      }
+    })
+
+    return view.render('pages/show', {
+      poll: {
+        id: poll.id,
+        name: poll.name,
+        options: optionsWithPercentage,
+      },
+    })
+  }
 }
