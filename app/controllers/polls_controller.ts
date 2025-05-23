@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import transmit from '@adonisjs/transmit/services/main'
 import Poll from '#models/poll'
 import Vote from '#models/vote'
+import { PollValidator } from '#validators/poll'
 import { v4 as uuidv4 } from 'uuid'
 
 // TODO: move logic to service
@@ -46,8 +47,7 @@ export default class PollsController {
 
   async store({ request, response, session }: HttpContext) {
     // TODO: Add validation
-
-    const { name, options } = request.only(['name', 'options'])
+    const { name, options } = await request.validateUsing(PollValidator)
     let ownerUuid: string = request.cookie('owner_uuid')
 
     if (!ownerUuid) {
