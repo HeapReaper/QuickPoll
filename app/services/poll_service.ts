@@ -103,7 +103,6 @@ export class PollService {
     optionId: number,
     response: any,
     request: Request,
-    session: any
   ) {
     const newVote: Vote = await Vote.findByOrFail('id', optionId)
     const previousOptionId = request.cookie(`voted_poll_${pollId}`)

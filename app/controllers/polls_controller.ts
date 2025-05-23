@@ -44,8 +44,7 @@ export default class PollsController {
       params.pollId,
       params.optionId,
       response,
-      request,
-      session
+      request
     )
 
     session.flash('success', 'Your vote has been updated!')
