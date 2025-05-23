@@ -17,6 +17,18 @@
       </a>
     </header>
 
+    @flashMessage('notification')
+      <div class="notification {{ $message.type }}">
+        {{ $message.message }}
+      </div>
+    @end
+
+    @if(flashMessages.error)
+      <div class="text-red-500">
+        {{ flashMessages.error }}
+      </div>
+    @endif
+    
     <main class="flex-grow">
       {{{ await $slots.main() }}}
     </main>
