@@ -3,10 +3,6 @@ import transmit from '@adonisjs/transmit/services/main'
 import Poll from '#models/poll'
 import Vote from '#models/vote'
 import { PollValidator } from '#validators/poll'
-import vine from '@vinejs/vine'
-
-import { pollOwnershipValidator } from '#validators/poll_ownership'
-
 import { v4 as uuidv4 } from 'uuid'
 
 // TODO: move logic to service
@@ -39,6 +35,7 @@ export default class PollsController {
       return {
         id: poll.id,
         name: poll.name,
+        // @ts-ignore
         createdAt: new Date(poll.createdAt).toString().split(' GM')[0],
         options: optionsWithPercentage,
       }
