@@ -41,33 +41,33 @@ async function initSubscription() {
 initSubscription().catch((err) => console.error(err))
 
 document.querySelectorAll('form[data-option-id]').forEach((form) => {
-  form.addEventListener('submit', async (e) => {
-  e.preventDefault()
+    form.addEventListener('submit', async (e) => {
+    e.preventDefault()
 
-  const action = form.action
-  const csrfToken = form.querySelector('input[name="_csrf"]')?.value
+    const action = form.action
+    const csrfToken = form.querySelector('input[name="_csrf"]')?.value
 
-  try {
-    const response = await fetch(action, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken,
-      },
-      body: JSON.stringify({}),
-    })
+    try {
+      const response = await fetch(action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken,
+        },
+        body: JSON.stringify({}),
+      })
 
-    if (!response.ok) {
-      throw new Error('Failed to vote')
+      if (!response.ok) {
+        throw new Error('Failed to vote')
+      }
+
+      await response.json()
+
+      console.log('updatePollUI')
+    } catch (error) {
+      console.error(error)
     }
-
-    await response.json()
-
-    console.log('updatePollUI')
-  } catch (error) {
-    console.error(error)
-  }
-})
+  })
 });
 
 function updatePollUI(message) {

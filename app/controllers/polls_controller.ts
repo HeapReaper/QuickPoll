@@ -34,20 +34,18 @@ export default class PollsController {
   async delete({ params, response, request, session }: HttpContext) {
     await PollService.handleDelete(params, response, request)
 
-    session.flash('success', 'Poll deleted!')
+    session.flash('notification', 'Poll deleted!')
 
     return response.redirect('/')
   }
 
-  async vote({ params, session, response, request }: HttpContext) {
+  async vote({ params, response, request }: HttpContext) {
     const { poll, totalVotes, optionsWithPercentage } = await PollService.handleVote(
       params.pollId,
       params.optionId,
       response,
       request
     )
-
-    session.flash('success', 'Your vote has been updated!')
 
     return response.json({
       pollId: params.pollId,
