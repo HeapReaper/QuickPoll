@@ -99,9 +99,22 @@ export default class PollsController {
     })
   }
 
-  async delete({ params, response, request }: HttpContext) {
-    const poll = 
-    if (!this.validateOwnerShipByCookie())
+  async delete({ params, response, request, session }: HttpContext) {
+    const poll = await Poll.query()
+      .where('id', params.id)
+      .firstOrFail()
+
+    if (!this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid'))) {
+      return response.redirect().back()
+    }
+
+    if (!await poll.delete()) {
+      session.flash('error', 'Something went wrong!')
+      return response.redirect('/')
+    }
+
+    session.flash('success', 'Poll deleted!')
+    return response.redirect('/')
   }
 
   async vote({ params, session, response, request }: HttpContext) {
