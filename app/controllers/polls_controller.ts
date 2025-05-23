@@ -36,7 +36,7 @@ export default class PollsController {
         id: poll.id,
         name: poll.name,
         // @ts-ignore
-        createdAt: poll.createdAt ? poll.createdAt.toFormat('yyyy-MM-dd HH:mm:ss') : 'N/A',
+        createdAt: poll.createdAt ? poll.createdAt.toFormat('dd-MM-yyyy HH:mm:ss') : 'N/A',
         options: optionsWithPercentage,
       }
     })
@@ -97,7 +97,7 @@ export default class PollsController {
       poll: {
         id: poll.id,
         name: poll.name,
-        createdAt: poll.createdAt ? poll.createdAt.toFormat('yyyy-MM-dd HH:mm:ss') : 'N/A',
+        createdAt: poll.createdAt ? poll.createdAt.toFormat('dd-MM-yyyy HH:mm:ss') : 'N/A',
         options: optionsWithPercentage,
         owner: await this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid')),
       },
