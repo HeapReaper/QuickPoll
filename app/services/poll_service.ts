@@ -109,8 +109,7 @@ export class PollService {
     const previousOptionId = request.cookie(`voted_poll_${pollId}`)
 
     if (previousOptionId) {
-      if (Number.parseInt(previousOptionId) === optionId) {
-        session.flash('error', 'You already voted for this option.')
+      if (optionId === previousOptionId) {
         return response.redirect().back()
       }
 
