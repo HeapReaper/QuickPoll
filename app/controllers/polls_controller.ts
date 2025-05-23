@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from 'uuid'
 
 export default class PollsController {
   async index({ view }: HttpContext) {
+    // TODO: Add validation
+
     const latestPollsRaw = await Poll.query()
       .orderBy('created_at', 'desc')
       .limit(5)
@@ -41,6 +43,8 @@ export default class PollsController {
   }
 
   async store({ request, response, session }: HttpContext) {
+    // TODO: Add validation
+
     const { name, options } = request.only(['name', 'options'])
     let ownerUuid: string = request.cookie('owner_uuid')
 
@@ -64,7 +68,9 @@ export default class PollsController {
     return response.redirect(`/poll/${poll.id}`)
   }
 
-  async show({ params, view, session, request }: HttpContext) {
+  async show({ params, view, request }: HttpContext) {
+    // TODO: Add validation
+
     const poll: Poll = await Poll.query()
       .where('id', params.id)
       .preload('options', (query) => {
@@ -94,30 +100,27 @@ export default class PollsController {
         id: poll.id,
         name: poll.name,
         options: optionsWithPercentage,
-        owner: this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid'))
+        owner: this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid')),
       },
     })
   }
 
   async delete({ params, response, request, session }: HttpContext) {
-    const poll = await Poll.query()
-      .where('id', params.id)
-      .firstOrFail()
+    // TODO: Add validation
+
+    const poll = await Poll.query().where('id', params.id).firstOrFail()
 
     if (!this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid'))) {
       return response.redirect().back()
     }
-
-    if (!await poll.delete()) {
-      session.flash('error', 'Something went wrong!')
-      return response.redirect('/')
-    }
+    await poll.delete()
 
     session.flash('success', 'Poll deleted!')
     return response.redirect('/')
   }
 
   async vote({ params, session, response, request }: HttpContext) {
+    // TODO: Add validation
     const { pollId, optionId } = params
 
     const newVote: Vote = await Vote.findByOrFail('id', optionId)
@@ -186,7 +189,8 @@ export default class PollsController {
     })
   }
 
-  validateOwnerShipByCookie(ownerUuid: string, cookieOwnerUuid: string) {
+  validateOwnerShipByCookie(ownerUuid: string, cookieOwnerUuid: string): boolean {
+    // TODO: add validation
     if (ownerUuid === undefined || cookieOwnerUuid === undefined) return false
     return ownerUuid.toLowerCase() === cookieOwnerUuid.toLowerCase()
   }
