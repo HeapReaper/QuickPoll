@@ -4,6 +4,7 @@ import Poll from '#models/poll'
 import Vote from '#models/vote'
 import { v4 as uuidv4 } from 'uuid'
 
+// TODO: move logic to service
 export default class PollsController {
   async index({ view }: HttpContext) {
     // TODO: Add validation
@@ -33,6 +34,7 @@ export default class PollsController {
       return {
         id: poll.id,
         name: poll.name,
+        createdAt: new Date(poll.createdAt).toString().split(' GM')[0],
         options: optionsWithPercentage,
       }
     })
@@ -99,6 +101,7 @@ export default class PollsController {
       poll: {
         id: poll.id,
         name: poll.name,
+        createdAt: new Date(poll.createdAt).toString().split(' GM')[0],
         options: optionsWithPercentage,
         owner: this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid')),
       },
