@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import transmit from '@adonisjs/transmit/services/main'
 import Poll from '#models/poll'
 import Vote from '#models/vote'
+import { v4 as uuidv4 } from 'uuid'
 
 export default class PollsController {
   async index({ view }: HttpContext) {
@@ -41,8 +42,18 @@ export default class PollsController {
 
   async store({ request, response, session }: HttpContext) {
     const { name, options } = request.only(['name', 'options'])
+    let ownerUuid: string = request.cookie('owner_uuid')
 
-    const poll = await Poll.create({ name })
+    if (!ownerUuid) {
+      ownerUuid = uuidv4()
+      response.cookie('owner_uuid', `${ownerUuid}`, {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 days.
+      })
+    }
+
+    const poll = await Poll.create({ name, ownerUuid })
 
     for (const optionName of options) {
       const option = await poll.related('options').create({ name: optionName })
@@ -53,7 +64,7 @@ export default class PollsController {
     return response.redirect(`/poll/${poll.id}`)
   }
 
-  async show({ params, view, session }: HttpContext) {
+  async show({ params, view, session, request }: HttpContext) {
     const poll: Poll = await Poll.query()
       .where('id', params.id)
       .preload('options', (query) => {
@@ -78,14 +89,32 @@ export default class PollsController {
       }
     })
 
-    session.flash('success', 'Poll created successfully!')
     return view.render('pages/show', {
       poll: {
         id: poll.id,
         name: poll.name,
         options: optionsWithPercentage,
+        owner: this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid'))
       },
     })
+  }
+
+  async delete({ params, response, request, session }: HttpContext) {
+    const poll = await Poll.query()
+      .where('id', params.id)
+      .firstOrFail()
+
+    if (!this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid'))) {
+      return response.redirect().back()
+    }
+
+    if (!await poll.delete()) {
+      session.flash('error', 'Something went wrong!')
+      return response.redirect('/')
+    }
+
+    session.flash('success', 'Poll deleted!')
+    return response.redirect('/')
   }
 
   async vote({ params, session, response, request }: HttpContext) {
@@ -155,5 +184,10 @@ export default class PollsController {
       optionId,
       options: optionsWithPercentage,
     })
+  }
+
+  validateOwnerShipByCookie(ownerUuid: string, cookieOwnerUuid: string) {
+    if (ownerUuid === undefined || cookieOwnerUuid === undefined) return false
+    return ownerUuid.toLowerCase() === cookieOwnerUuid.toLowerCase()
   }
 }
