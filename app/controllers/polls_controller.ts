@@ -41,8 +41,6 @@ export default class PollsController {
       }
     })
 
-    transmit.broadcast('global', { message: 'Hello' })
-
     return view.render('pages/index', { polls: latestPolls })
   }
 
