@@ -1,6 +1,7 @@
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import Option from '#models/option'
+import { DateTime } from 'luxon'
 
 export default class Vote extends BaseModel {
   public static table: string = 'poll_votes'

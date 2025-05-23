@@ -14,10 +14,10 @@ export default class Poll extends BaseModel {
   public ownerUuid!: string
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  public createdAt!: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  public updatedAt!: DateTime
 
   @hasMany(() => Option)
   public options!: HasMany<typeof Option>
