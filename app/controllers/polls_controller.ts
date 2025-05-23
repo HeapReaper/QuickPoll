@@ -9,7 +9,7 @@ export default class PollsController {
     // TODO: Add validation
 
     const latestPollsRaw = await Poll.query()
-      .orderBy('created_at', 'desc')
+      .orderBy('id', 'desc')
       .limit(5)
       .preload('options', (query) => {
         query.preload('vote')
