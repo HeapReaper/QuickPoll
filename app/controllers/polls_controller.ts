@@ -3,6 +3,10 @@ import transmit from '@adonisjs/transmit/services/main'
 import Poll from '#models/poll'
 import Vote from '#models/vote'
 import { PollValidator } from '#validators/poll'
+import vine from '@vinejs/vine'
+
+import { pollOwnershipValidator } from '#validators/poll_ownership'
+
 import { v4 as uuidv4 } from 'uuid'
 
 // TODO: move logic to service
@@ -46,7 +50,6 @@ export default class PollsController {
   }
 
   async store({ request, response, session }: HttpContext) {
-    // TODO: Add validation
     const { name, options } = await request.validateUsing(PollValidator)
     let ownerUuid: string = request.cookie('owner_uuid')
 
@@ -71,8 +74,6 @@ export default class PollsController {
   }
 
   async show({ params, view, request }: HttpContext) {
-    // TODO: Add validation
-
     const poll: Poll = await Poll.query()
       .where('id', params.id)
       .preload('options', (query) => {
@@ -103,17 +104,15 @@ export default class PollsController {
         name: poll.name,
         createdAt: new Date(poll.createdAt).toString().split(' GM')[0],
         options: optionsWithPercentage,
-        owner: this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid')),
+        owner: await this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid')),
       },
     })
   }
 
   async delete({ params, response, request, session }: HttpContext) {
-    // TODO: Add validation
-
     const poll = await Poll.query().where('id', params.id).firstOrFail()
 
-    if (!this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid'))) {
+    if (!(await this.validateOwnerShipByCookie(poll.ownerUuid, request.cookie('owner_uuid')))) {
       return response.redirect().back()
     }
     await poll.delete()
@@ -192,9 +191,9 @@ export default class PollsController {
     })
   }
 
-  validateOwnerShipByCookie(ownerUuid: string, cookieOwnerUuid: string): boolean {
-    // TODO: add validation
+  async validateOwnerShipByCookie(ownerUuid: string, cookieOwnerUuid: string): Promise<boolean> {
     if (ownerUuid === undefined || cookieOwnerUuid === undefined) return false
+
     return ownerUuid.toLowerCase() === cookieOwnerUuid.toLowerCase()
   }
 }
