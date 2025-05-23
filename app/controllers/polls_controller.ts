@@ -40,11 +40,9 @@ export default class PollsController {
   }
 
   async vote({ params, session, response, request }: HttpContext) {
-    const { pollId, optionId } = params
-
     const { poll, totalVotes, optionsWithPercentage } = await PollService.handleVote(
-      pollId,
-      optionId,
+      params.pollId,
+      params.optionId,
       response,
       request,
       session
@@ -53,10 +51,10 @@ export default class PollsController {
     session.flash('success', 'Your vote has been updated!')
 
     return response.json({
-      pollId,
+      pollId: params.pollId,
       pollName: poll.name,
       totalVotes,
-      optionId,
+      optionId: params.optionId,
       options: optionsWithPercentage,
     })
   }
