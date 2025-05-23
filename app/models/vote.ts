@@ -14,6 +14,12 @@ export default class Vote extends BaseModel {
   @column()
   public count!: number
 
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
+
   @belongsTo(() => Option)
   public option!: BelongsTo<typeof Option>
 }
