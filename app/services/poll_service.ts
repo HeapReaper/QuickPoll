@@ -68,7 +68,7 @@ export class PollService {
 
     const totalVotes: number = poll.options.reduce(
       (sum, option) => sum + (option.vote?.count ?? 0),
-      0,
+      0
     )
 
     const optionsWithPercentage = poll.options.map((option) => {
@@ -90,8 +90,6 @@ export class PollService {
   }
 
   static async handleDelete(params: Record<string, any>, response: Response, request: Request) {
-    await PollService.handleDelete(params, request)
-
     const poll = await Poll.query().where('id', params.id).firstOrFail()
 
     if (!(await this.valPollOwner(poll.ownerUuid, request.cookie('owner_uuid')))) {
@@ -111,7 +109,7 @@ export class PollService {
     const previousOptionId = request.cookie(`voted_poll_${pollId}`)
 
     if (previousOptionId) {
-      if (Number.parseInt(previousOptionId) === Number.parseInt(optionId)) {
+      if (Number.parseInt(previousOptionId) === optionId) {
         session.flash('error', 'You already voted for this option.')
         return response.redirect().back()
       }
