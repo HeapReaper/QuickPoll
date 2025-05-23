@@ -9,6 +9,9 @@ export default class Poll extends BaseModel {
   @column()
   public name!: string
 
+  @column()
+  public ownerUuid!: string
+
   @hasMany(() => Option)
   public options!: HasMany<typeof Option>
 }

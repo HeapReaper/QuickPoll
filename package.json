@@ -70,7 +70,8 @@
     "edge.js": "^6.2.1",
     "luxon": "^3.6.1",
     "mysql2": "^3.14.1",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "uuid": "^11.1.0"
   },
   "hotHook": {
     "boundaries": [
