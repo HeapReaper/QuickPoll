@@ -5,13 +5,14 @@ import { v4 as uuidv4 } from 'uuid'
 import transmit from '@adonisjs/transmit/services/main'
 
 export class PollService {
-  static async handlePollIndex() {
+  static async handlePollIndex(request: Request) {
+    const page = request.input('page', 1)
     const latestPollsRaw = await Poll.query()
       .orderBy('id', 'desc')
-      .limit(5)
       .preload('options', (query) => {
         query.preload('vote')
       })
+      .paginate(page, 2)
 
     return latestPollsRaw.map((poll) => {
       const totalVotes = poll.options.reduce((sum, option) => sum + (option.vote?.count ?? 0), 0)

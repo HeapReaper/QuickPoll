@@ -4,7 +4,6 @@ import * as Turbo from '@hotwired/turbo'
 
 window.Alpine = Alpine
 Alpine.start()
-
 window.Turbo = Turbo
 
 /** @type {import('tailwindcss').Config} */

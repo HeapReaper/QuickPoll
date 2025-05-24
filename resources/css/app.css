@@ -4,3 +4,9 @@
 @tailwind components;
 @tailwind utilities;
 @source "../views";
+
+html, body {
+  background-color: #111827;
+  min-height: 100%;
+  transition: background-color 0.2s ease;
+}

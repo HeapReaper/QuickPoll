@@ -30,13 +30,14 @@
               <form method="POST" action="/polls/{{ poll.id }}/vote/{{ option.id }}" data-option-id="{{ option.id }}">
                 {{ csrfField() }}
                 <button type="submit" class="w-full text-left">
+                  {{ option.percentage }}% / {{ option.count }} vote(s)
                   <div class="bg-gray-700 rounded-lg overflow-hidden relative hover:opacity-80 transition">
                     <div
                       class="poll-bar bg-blue-500 text-white px-4 py-2"
                       style="width: {{ option.percentage }}%; height: 100%; position: absolute; top: 0; left: 0; {{ option.percentage == 0 ? 'display: none;' : '' }}">
                     </div>
                     <div class="poll-label relative text-white text-center py-2">
-                      {{ option.name }} ({{ option.percentage }}%) / {{ option.count }} vote(s)
+                      {{ option.name }}
                     </div>
                   </div>
                 </button>
@@ -46,6 +47,5 @@
         </div>
       </section>
     </section>
-
   @endslot
 @end

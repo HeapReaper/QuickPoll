@@ -3,8 +3,10 @@ import { PollValidator } from '#validators/poll'
 import { PollService } from '#services/poll_service'
 
 export default class PollsController {
-  async index({ view }: HttpContext) {
-    return view.render('pages/index', { polls: await PollService.handlePollIndex() })
+  async index({ view, request }: HttpContext) {
+    const polls = await PollService.handlePollIndex(request)
+
+    return view.render('pages/index', { polls: polls })
   }
 
   async store({ request, response, session }: HttpContext) {

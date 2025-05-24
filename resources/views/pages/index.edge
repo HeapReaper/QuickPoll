@@ -86,6 +86,7 @@
         </div>
         <div class="space-y-3">
           @each (option in poll.options)
+            {{ option.percentage }}% / {{ option.count }} votes
             <div class="bg-gray-700 rounded-lg overflow-hidden">
               <div class="bg-gray-700 rounded-lg overflow-hidden relative">
                 @if (option.percentage > 0)
@@ -95,7 +96,7 @@
                 ></div>
                 @endif
                 <div class="relative text-white text-center py-2">
-                  {{ option.name }} ({{ option.percentage }}%) / {{ option.count }} votes
+                  {{ option.name }}
                 </div>
               </div>
             </div>
