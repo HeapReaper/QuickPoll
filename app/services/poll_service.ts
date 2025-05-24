@@ -3,6 +3,7 @@ import Vote from '#models/vote'
 import { Request, Response } from '@adonisjs/http-server'
 import { v4 as uuidv4 } from 'uuid'
 import transmit from '@adonisjs/transmit/services/main'
+import redis from '@adonisjs/redis/services/main'
 
 export class PollService {
   static async handlePollIndex(request: Request) {
@@ -103,6 +104,17 @@ export class PollService {
     const newVote: Vote = await Vote.findByOrFail('id', optionId)
     const previousOptionId = request.cookie(`voted_poll_${pollId}`)
 
+    const redisKey = `poll_votes:${pollId}:${request.ip()}`
+    const maxVotesPerIP = 5
+
+    const currentVotes = await redis.incr(redisKey)
+
+    if (currentVotes === 1) {
+      await redis.expire(redisKey, 60 * 30)
+    }
+
+    if (currentVotes > maxVotesPerIP) return
+
     if (previousOptionId) {
       if (optionId === previousOptionId) {
         return response.redirect().back()
@@ -161,6 +173,7 @@ export class PollService {
       optionsWithPercentage,
     }
   }
+
   static async valPollOwner(ownerUuid: string, cookieOwnerUuid: string): Promise<boolean> {
     if (ownerUuid === undefined || cookieOwnerUuid === undefined) return false
 

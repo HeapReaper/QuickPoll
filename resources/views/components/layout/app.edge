@@ -10,7 +10,12 @@
 
     <title>{{ title || 'QuickPoll' }}</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite([
+      'resources/css/app.css',
+      'resources/js/app.js',
+      'resources/js/transmit.js',
+      'resources/js/infiniteScroll.js',
+    ])
   </head>
 
   <body class="font-sans bg-gray-900 text-white flex flex-col min-h-screen">
