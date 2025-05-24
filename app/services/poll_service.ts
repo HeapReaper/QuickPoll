@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import transmit from '@adonisjs/transmit/services/main'
 
 export class PollService {
-  static async handlePollIndex(request) {
+  static async handlePollIndex(request: Request) {
     const page = request.input('page', 1)
     const latestPollsRaw = await Poll.query()
       .orderBy('id', 'desc')
