@@ -105,7 +105,7 @@ export class PollService {
     const previousOptionId = request.cookie(`voted_poll_${pollId}`)
 
     const redisKey = `poll_votes:${pollId}:${request.ip()}`
-    const maxVotesPerIP = 5
+    const maxVotesPerIP = 10
 
     const currentVotes = await redis.incr(redisKey)
 
