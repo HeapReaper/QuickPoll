@@ -1,49 +1,12 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { PollValidator } from '#validators/poll'
 import { PollService } from '#services/poll_service'
-import Poll from '#models/poll'
 
 export default class PollsController {
   async index({ view, request }: HttpContext) {
     const polls = await PollService.handlePollIndex(request)
 
     return view.render('pages/index', { polls: polls })
-  }
-
-  async list({ request, response }: HttpContext) {
-    const page = request.input('page', 1)
-
-    const latestPollsRaw = await Poll.query()
-      .orderBy('created_at', 'desc')
-      .limit(5)
-      .preload('options', (query) => {
-        query.preload('vote')
-      })
-      .paginate(5)
-
-    const latestPolls = latestPollsRaw.map((poll) => {
-      const totalVotes = poll.options.reduce((sum, option) => sum + (option.vote?.count ?? 0), 0)
-
-      const optionsWithPercentage = poll.options.map((option) => {
-        const count = option.vote?.count ?? 0
-        const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
-
-        return {
-          id: option.id,
-          name: option.name,
-          count,
-          percentage,
-        }
-      })
-    })
-
-    return response.json({
-      success: true,
-      data: [
-        { id: 1, question: 'AeroBytes' },
-        { id: 2, question: 'Peter' },
-      ],
-    })
   }
 
   async store({ request, response, session }: HttpContext) {

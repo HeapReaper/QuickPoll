@@ -4,7 +4,6 @@ import transmit from '@adonisjs/transmit/services/main'
 import { throttle, throttlePollCreation } from '#start/limiter'
 
 router.get('/', [PollsController, 'index'])
-router.get('api/polls/list', [PollsController, 'list'])
 
 router.post('/polls-store', [PollsController, 'store']).use(throttlePollCreation)
 router.get('/poll/:id', [PollsController, 'show'])
