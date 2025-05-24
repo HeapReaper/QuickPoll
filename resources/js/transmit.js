@@ -66,9 +66,6 @@ document.querySelectorAll('form[data-option-id]').forEach((form) => {
         console.error('Failed to vote!')
       }
 
-      await response.json()
-
-      console.log('updatePollUI')
     } catch (error) {
       console.error(error)
     }

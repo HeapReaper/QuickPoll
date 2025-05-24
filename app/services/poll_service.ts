@@ -108,71 +108,72 @@ export class PollService {
     const maxVotesPerIP = 5
 
     const currentVotes = await redis.incr(redisKey)
-
     if (currentVotes === 1) {
       await redis.expire(redisKey, 60 * 30)
     }
 
-    if (currentVotes <= maxVotesPerIP) {
-      if (previousOptionId) {
-        if (optionId === previousOptionId) {
-          return response.redirect().back()
-        }
+    if (currentVotes > maxVotesPerIP) {
+      return response.status(429).send('Too many votes from this IP')
+    }
 
-        const previousVote = await Vote.find(previousOptionId)
-        if (previousVote) {
-          previousVote.count = Math.max(0, previousVote.count - 1)
-          await previousVote.save()
-        }
-      }
+    if (previousOptionId && optionId === Number(previousOptionId)) {
+      return response.redirect().back()
+    }
 
-      newVote.count += 1
-      await newVote.save()
-
-      // TODO: Fix duplicate code
-      const poll: Poll = await Poll.query()
-        .where('id', pollId)
-        .preload('options', (query) => {
-          query.preload('vote')
-        })
-        .firstOrFail()
-
-      const totalVotes: number = poll.options.reduce(
-        (sum, option) => sum + (option.vote?.count ?? 0),
-        0
-      )
-
-      const optionsWithPercentage = poll.options.map((option) => {
-        const count: number = option.vote?.count ?? 0
-        const percentage: number = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
-
-        return {
-          id: option.id,
-          name: option.name,
-          count,
-          percentage,
-        }
-      })
-
-      transmit.broadcast('poll-updated', {
-        pollId,
-        pollName: poll.name,
-        totalVotes,
-        options: optionsWithPercentage,
-      })
-
-      response.cookie(`voted_poll_${pollId}`, optionId, {
-        httpOnly: true,
-        maxAge: '7d',
-      })
-
-      return {
-        poll,
-        totalVotes,
-        optionsWithPercentage,
+    if (previousOptionId) {
+      const previousVote = await Vote.find(previousOptionId)
+      if (previousVote) {
+        previousVote.count = Math.max(0, previousVote.count - 1)
+        await previousVote.save()
       }
     }
+
+    newVote.count += 1
+    await newVote.save()
+
+    const poll: Poll = await Poll.query()
+      .where('id', pollId)
+      .preload('options', (query) => {
+        query.preload('vote')
+      })
+      .firstOrFail()
+
+    const totalVotes: number = poll.options.reduce(
+      (sum, option) => sum + (option.vote?.count ?? 0),
+      0
+    )
+
+    const optionsWithPercentage = poll.options.map((option) => {
+      const count: number = option.vote?.count ?? 0
+      const percentage: number = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
+
+      return {
+        id: option.id,
+        name: option.name,
+        count,
+        percentage,
+      }
+    })
+
+    transmit.broadcast('poll-updated', {
+      pollId,
+      pollName: poll.name,
+      totalVotes,
+      options: optionsWithPercentage,
+    })
+
+    response.cookie(`voted_poll_${pollId}`, optionId, {
+      httpOnly: true,
+      maxAge: '7d',
+    })
+
+    return {
+      poll,
+      totalVotes,
+      optionsWithPercentage,
+    }
   }
+
 
   static async valPollOwner(ownerUuid: string, cookieOwnerUuid: string): Promise<boolean> {
     if (ownerUuid === undefined || cookieOwnerUuid === undefined) return false
