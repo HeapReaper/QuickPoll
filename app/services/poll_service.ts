@@ -105,7 +105,7 @@ export class PollService {
     const previousOptionId = request.cookie(`voted_poll_${pollId}`)
 
     const redisKey = `poll_votes:${pollId}:${request.ip()}`
-    const maxVotesPerIP = 10
+    const maxVotesPerIP = 5
 
     const currentVotes = await redis.incr(redisKey)
 
@@ -113,64 +113,64 @@ export class PollService {
       await redis.expire(redisKey, 60 * 30)
     }
 
-    if (currentVotes > maxVotesPerIP) return
+    if (currentVotes <= maxVotesPerIP) {
+      if (previousOptionId) {
+        if (optionId === previousOptionId) {
+          return response.redirect().back()
+        }
 
-    if (previousOptionId) {
-      if (optionId === previousOptionId) {
-        return response.redirect().back()
+        const previousVote = await Vote.find(previousOptionId)
+        if (previousVote) {
+          previousVote.count = Math.max(0, previousVote.count - 1)
+          await previousVote.save()
+        }
       }
 
-      const previousVote = await Vote.find(previousOptionId)
-      if (previousVote) {
-        previousVote.count = Math.max(0, previousVote.count - 1)
-        await previousVote.save()
-      }
-    }
+      newVote.count += 1
+      await newVote.save()
 
-    newVote.count += 1
-    await newVote.save()
+      // TODO: Fix duplicate code
+      const poll: Poll = await Poll.query()
+        .where('id', pollId)
+        .preload('options', (query) => {
+          query.preload('vote')
+        })
+        .firstOrFail()
 
-    // TODO: Fix duplicate code
-    const poll: Poll = await Poll.query()
-      .where('id', pollId)
-      .preload('options', (query) => {
-        query.preload('vote')
+      const totalVotes: number = poll.options.reduce(
+        (sum, option) => sum + (option.vote?.count ?? 0),
+        0
+      )
+
+      const optionsWithPercentage = poll.options.map((option) => {
+        const count: number = option.vote?.count ?? 0
+        const percentage: number = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
+
+        return {
+          id: option.id,
+          name: option.name,
+          count,
+          percentage,
+        }
       })
-      .firstOrFail()
 
-    const totalVotes: number = poll.options.reduce(
-      (sum, option) => sum + (option.vote?.count ?? 0),
-      0
-    )
+      transmit.broadcast('poll-updated', {
+        pollId,
+        pollName: poll.name,
+        totalVotes,
+        options: optionsWithPercentage,
+      })
 
-    const optionsWithPercentage = poll.options.map((option) => {
-      const count: number = option.vote?.count ?? 0
-      const percentage: number = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
+      response.cookie(`voted_poll_${pollId}`, optionId, {
+        httpOnly: true,
+        maxAge: '7d',
+      })
 
       return {
-        id: option.id,
-        name: option.name,
-        count,
-        percentage,
+        poll,
+        totalVotes,
+        optionsWithPercentage,
       }
-    })
-
-    transmit.broadcast('poll-updated', {
-      pollId,
-      pollName: poll.name,
-      totalVotes,
-      options: optionsWithPercentage,
-    })
-
-    response.cookie(`voted_poll_${pollId}`, optionId, {
-      httpOnly: true,
-      maxAge: '7d',
-    })
-
-    return {
-      poll,
-      totalVotes,
-      optionsWithPercentage,
     }
   }
 
