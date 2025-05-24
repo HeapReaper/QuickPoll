@@ -5,7 +5,6 @@ import { PollService } from '#services/poll_service'
 export default class PollsController {
   async index({ view, request }: HttpContext) {
     const polls = await PollService.handlePollIndex(request)
-    polls.baseUrl('/')
 
     return view.render('pages/index', { polls: polls })
   }
