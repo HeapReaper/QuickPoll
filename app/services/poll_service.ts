@@ -98,12 +98,7 @@ export class PollService {
     await poll.delete()
   }
 
-  static async handleVote(
-    pollId: number,
-    optionId: number,
-    response: any,
-    request: Request,
-  ) {
+  static async handleVote(pollId: number, optionId: number, response: any, request: Request) {
     const newVote: Vote = await Vote.findByOrFail('id', optionId)
     const previousOptionId = request.cookie(`voted_poll_${pollId}`)
 

@@ -41,7 +41,7 @@ async function initSubscription() {
 initSubscription().catch((err) => console.error(err))
 
 document.querySelectorAll('form[data-option-id]').forEach((form) => {
-    form.addEventListener('submit', async (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault()
 
     const action = form.action
@@ -54,11 +54,12 @@ document.querySelectorAll('form[data-option-id]').forEach((form) => {
           'Content-Type': 'application/json',
           'X-CSRF-TOKEN': csrfToken,
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify({
+        }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to vote')
+        console.error('Failed to vote!')
       }
 
       await response.json()
