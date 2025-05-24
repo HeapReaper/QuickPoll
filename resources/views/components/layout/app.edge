@@ -5,9 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Create and Share Polls Instantly">
     <meta name="author" content="AeroBytes">
+
     <link rel="icon" type="image/png" href="/poll.png">
+    <link rel="preload" href="/build/assets/app.css" as="style" />
+    <link rel="preload" href="/build/assets/app.js" as="script" />
+
     <title>{{ title || 'QuickPoll' }}</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
   </head>
+
   <body class="font-sans bg-gray-900 text-white flex flex-col min-h-screen">
     <!-- TODO: Place navbar in its own file? -->
     <header class="flex flex-wrap items-center justify-between p-4 md:p-6 border-b border-gray-800">
@@ -17,26 +24,12 @@
       </a>
     </header>
 
-    <main class="flex-grow">
-      @flashMessage('notification')
-        <div class="notification {{ $message.type }}">
-          {{ $message.message }}
-        </div>
-      @end
-
-      @if(flashMessages.notification)
-      <div class="text-green-600">
-        {{ flashMessages.notification.message }}
-      </div>
-    @endif
-
+    <main class="flex-grow" up-main>
       {{{ await $slots.main() }}}
     </main>
 
     <footer class="text-center text-sm text-gray-500 py-6 border-t border-gray-700">
       &copy; {{ new Date().getFullYear() }} QuickPoll. All rights reserved.
     </footer>
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
   </body>
 </html>
