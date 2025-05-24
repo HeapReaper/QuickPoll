@@ -12,7 +12,7 @@ export class PollService {
       .preload('options', (query) => {
         query.preload('vote')
       })
-      .paginate(page, 2)
+      .paginate(page, 5)
 
     return latestPollsRaw.map((poll) => {
       const totalVotes = poll.options.reduce((sum, option) => sum + (option.vote?.count ?? 0), 0)
