@@ -7,12 +7,16 @@
     <meta name="author" content="AeroBytes">
 
     <link rel="icon" type="image/png" href="/poll.png">
-    <link rel="preload" href="/build/assets/app.css" as="style" />
-    <link rel="preload" href="/build/assets/app.js" as="script" />
 
     <title>{{ title || 'QuickPoll' }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @set(preloadCss = vite.manifest()['resources/css/app.css'])
+
+    @if(preloadCss)
+      <link rel="preload" as="style" href="{{ preloadCss.file }}" />
+    @endif
   </head>
 
   <body class="font-sans bg-gray-900 text-white flex flex-col min-h-screen">
