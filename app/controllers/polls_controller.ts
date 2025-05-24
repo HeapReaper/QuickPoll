@@ -48,19 +48,32 @@ export default class PollsController {
   }
 
   async vote({ params, response, request }: HttpContext) {
-    const { poll, totalVotes, optionsWithPercentage } = await PollService.handleVote(
-      params.pollId,
-      params.optionId,
-      response,
-      request
-    )
+    try {
+      const result = await PollService.handleVote(params.pollId, params.optionId, response, request)
 
-    return response.json({
-      pollId: params.pollId,
-      pollName: poll.name,
-      totalVotes,
-      optionId: params.optionId,
-      options: optionsWithPercentage,
-    })
+      if (!result) {
+        return response.status(204)
+      }
+
+      const { poll, totalVotes, optionsWithPercentage } = result
+
+      return response.status(200).json({
+        pollId: params.pollId,
+        pollName: poll.name,
+        totalVotes,
+        optionId: params.optionId,
+        options: optionsWithPercentage,
+      })
+    } catch (error) {
+      if (error.message === 'Too many votes from this IP') {
+        return response.status(429).json({ message: error.message })
+      }
+
+      if (error.code === 'E_ROW_NOT_FOUND') {
+        return response.status(404).json({ message: 'Poll or option not found' })
+      }
+
+      return response.status(500).json({ message: 'Unexpected error occurred' })
+    }
   }
 }

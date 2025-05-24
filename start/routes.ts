@@ -7,7 +7,7 @@ router.get('/', [PollsController, 'index'])
 
 router.post('/polls-store', [PollsController, 'store']).use(throttlePollCreation)
 router.get('/poll/:id', [PollsController, 'show'])
-router.post('/polls/:pollId/vote/:optionId', [PollsController, 'vote']).use(throttle)
+router.post('/polls/:pollId/vote/:optionId', [PollsController, 'vote'])//.use(throttle)
 router.post('/polls/delete/:id', [PollsController, 'delete']).use(throttlePollCreation)
 
 transmit.registerRoutes()

@@ -13,7 +13,7 @@ import limiter from '@adonisjs/limiter/services/main'
 
 export const throttle = limiter.define('global', () => {
   return limiter
-    .allowRequests(10)
+    .allowRequests(15)
     .every('1 minute')
     .limitExceeded((error) => {
       error.setStatus(429).setMessage('Rate limited!')
