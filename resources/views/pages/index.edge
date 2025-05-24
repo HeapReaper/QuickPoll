@@ -1,6 +1,7 @@
 @layout.app({ title: "QuickPoll" })
   @slot('meta')
     <meta name="description" content="Make a quick poll!">
+    @vite(['resources/js/transmit.js'])
   @endslot
 
   @slot('main')
@@ -14,6 +15,9 @@
         <a @click="open = true" class="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition cursor-pointer">
           Create a Poll
         </a>
+
+        <div id="polls-container"></div>
+        <div id="polls-loader" style="display: none;">Loading more polls...</div>
 
         <span x-show="open">
           <template x-if="open">
