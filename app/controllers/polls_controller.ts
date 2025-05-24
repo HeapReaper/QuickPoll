@@ -8,6 +8,9 @@ export default class PollsController {
   }
 
   async store({ request, response, session }: HttpContext) {
+    const body = request.body()
+    if (Array.isArray(body.options)) body.options.pop()
+
     const { name, options } = await request.validateUsing(PollValidator)
     let ownerUuid: string = request.cookie('owner_uuid')
 
@@ -31,10 +34,13 @@ export default class PollsController {
     })
   }
 
-  async delete({ params, response, request, session }: HttpContext) {
+  async delete({ params, response, request }: HttpContext) {
     await PollService.handleDelete(params, response, request)
 
-    session.flash('notification', 'Poll deleted!')
+    //    session.flash('notification', {
+    //      type: 'success',
+    //      message: 'Poll deleted!',
+    //    })
 
     return response.redirect('/')
   }

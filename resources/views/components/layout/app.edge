@@ -17,19 +17,19 @@
       </a>
     </header>
 
-    @flashMessage('notification')
-      <div class="notification {{ $message.type }}">
-        {{ $message.message }}
-      </div>
-    @end
+    <main class="flex-grow">
+      @flashMessage('notification')
+        <div class="notification {{ $message.type }}">
+          {{ $message.message }}
+        </div>
+      @end
 
-    @if(flashMessages.error)
-      <div class="text-red-500">
-        {{ flashMessages.error }}
+      @if(flashMessages.notification)
+      <div class="text-green-600">
+        {{ flashMessages.notification.message }}
       </div>
     @endif
-    
-    <main class="flex-grow">
+
       {{{ await $slots.main() }}}
     </main>
 
