@@ -2,32 +2,37 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>{{ title || "Your default title" }}</title>
-    @if ($slots.meta)
-      {{{ await $slots.meta() }}}
-    @endif
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Create and Share Polls Instantly">
+    <meta name="author" content="AeroBytes">
+
+    <link rel="icon" type="image/png" href="/poll.png">
+
+    <title>{{ title || 'QuickPoll' }}</title>
+
+    @vite([
+      'resources/css/app.css',
+      'resources/js/app.js',
+      'resources/js/transmit.js',
+      'resources/js/infiniteScroll.js',
+    ])
   </head>
+
   <body class="font-sans bg-gray-900 text-white flex flex-col min-h-screen">
-    <!-- TODO: Place navbar in it's own file? -->
-    <header class="flex items-center justify-between p-6 bg-gray-800 shadow-md">
-      <a href="/">
-        <h1 class="text-2xl font-bold text-blue-400">QuickPoll</h1>
+    <!-- TODO: Place navbar in its own file? -->
+    <header class="flex flex-wrap items-center justify-between p-4 md:p-6 border-b border-gray-800">
+      <a href="/" class="flex items-center space-x-2 text-2xl font-bold text-blue-400 hover:text-blue-500">
+        <img src="/poll.png" alt="QuickPoll Logo" class="h-8 w-8">
+        <span>QuickPoll</span>
       </a>
-      <nav class="space-x-6">
-        <a href="#" class="text-gray-300 hover:text-blue-400">Home</a>
-        <a href="#" class="text-gray-300 hover:text-blue-400">Polls</a>
-      </nav>
     </header>
 
-    <div class="flex-grow">
+    <main class="flex-grow" up-main>
       {{{ await $slots.main() }}}
-    </div>
+    </main>
 
-    <!-- TODO: Place footer in it's own file? -->
     <footer class="text-center text-sm text-gray-500 py-6 border-t border-gray-700">
       &copy; {{ new Date().getFullYear() }} QuickPoll. All rights reserved.
     </footer>
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
   </body>
 </html>

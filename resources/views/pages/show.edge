@@ -1,8 +1,4 @@
 @layout.app({ title: "QuickPoll" })
-  @slot('meta')
-  <meta name="description" content="{{ poll.name }}">
-  @endslot
-
   @slot('main')
     <section class="text-center py-24 px-4">
       <h2 class="text-4xl md:text-5xl font-extrabold mb-6 text-white">Create and Share Polls Instantly</h2>
@@ -11,29 +7,49 @@
       </p>
 
       <section data-poll-id="{{ poll.id }}" class="max-w-3xl mx-auto px-4 mb-20">
-        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
-          <h3 class="text-2xl font-semibold text-blue-400 mb-4">{{ poll.name }}</h3>
-          <div class="space-y-3">
-            @each (option in poll.options)
-            <form method="POST" action="/polls/{{ poll.id }}/vote/{{ option.id }}" data-option-id="{{ option.id }}">
+        <div class="relative bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+          @if(poll.owner)
+            <form action="/polls/delete/{{ poll.id }}" method="POST"
+                  onsubmit="return confirm('Are you sure you want to delete poll: {{ poll.name }}?')">
               {{ csrfField() }}
-              <button type="submit" class="w-full text-left">
-                <div class="bg-gray-700 rounded-lg overflow-hidden relative hover:opacity-80 transition">
-                  @if (option.percentage > 0)
-                  <div
-                    class="poll-bar bg-blue-500 text-white px-4 py-2"
-                    style="width: {{ option.percentage }}%; height: 100%; position: absolute; top: 0; left: 0;"
-                  ></div>
-                  @endif
-                  <div class="poll-label relative text-white text-center py-2">
-                    {{ option.name }} ({{ option.percentage }}%)
-                  </div>
-                </div>
+              <button type="submit" class="absolute -top-3 -right-3 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12" />
+                </svg>
               </button>
             </form>
-            @endeach
+          @endif
+
+          <div class="flex justify-between items-center mb-2">
+            <h3 class="text-2xl font-semibold text-blue-400 mb-2">{{ poll.name }}</h3>
+            <span class="text-sm text-gray-400">{{ poll.createdAt }}</span>
           </div>
-          <small class="">Total votes: wip</small>
+          <div class="space-y-3">
+            @each (option in poll.options)
+              <form method="POST" action="/polls/{{ poll.id }}/vote/{{ option.id }}" data-option-id="{{ option.id }}">
+                {{ csrfField() }}
+                <button type="submit" class="w-full text-left">
+                  {{ option.percentage }}% / {{ option.count }} vote(s)
+                  <div class="bg-gray-700 rounded-lg overflow-hidden relative hover:opacity-80 transition">
+                    <div
+                      class="poll-bar bg-blue-500 text-white px-4 py-2"
+                      style="width: {{ option.percentage }}%; height: 100%; position: absolute; top: 0; left: 0; {{ option.percentage == 0 ? 'display: none;' : '' }}">
+                    </div>
+                    <div class="poll-label relative text-white text-center py-2">
+                      {{ option.name }}
+                    </div>
+                  </div>
+                </button>
+              </form>
+            @endeach
+            <small class="block text-center text-xs text-gray-500">
+              These are public polls. For vote integrity, please
+              <a href="" class="text-blue-400 underline">
+                create an account.
+              </a>
+            </small>
+          </div>
         </div>
       </section>
     </section>

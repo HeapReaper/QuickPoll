@@ -1,158 +1,79 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import transmit from '@adonisjs/transmit/services/main'
-import Poll from '#models/poll'
-import Vote from '#models/vote'
+import { PollValidator } from '#validators/poll'
+import { PollService } from '#services/poll_service'
 
 export default class PollsController {
-  async index({ view }: HttpContext) {
-    const latestPollsRaw = await Poll.query()
-      .orderBy('created_at', 'desc')
-      .limit(5)
-      .preload('options', (query) => {
-        query.preload('vote')
-      })
+  async index({ view, request }: HttpContext) {
+    const polls = await PollService.handlePollIndex(request)
 
-    const latestPolls = latestPollsRaw.map((poll) => {
-      const totalVotes = poll.options.reduce((sum, option) => sum + (option.vote?.count ?? 0), 0)
-
-      const optionsWithPercentage = poll.options.map((option) => {
-        const count = option.vote?.count ?? 0
-        const percentage = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
-
-        return {
-          id: option.id,
-          name: option.name,
-          count,
-          percentage,
-        }
-      })
-
-      return {
-        id: poll.id,
-        name: poll.name,
-        options: optionsWithPercentage,
-      }
-    })
-
-    transmit.broadcast('global', { message: 'Hello' })
-
-    return view.render('pages/create', { polls: latestPolls })
+    return view.render('pages/index', { polls: polls })
   }
 
   async store({ request, response, session }: HttpContext) {
-    const { name, options } = request.only(['name', 'options'])
+    const body = request.body()
+    if (Array.isArray(body.options)) body.options.pop()
 
-    const poll = await Poll.create({ name })
+    const { name, options } = await request.validateUsing(PollValidator)
+    let ownerUuid: string = request.cookie('owner_uuid')
 
-    for (const optionName of options) {
-      const option = await poll.related('options').create({ name: optionName })
-      await Vote.create({ optionId: option.id, count: 0 })
-    }
+    const poll = await PollService.savePoll(name, options, ownerUuid, response)
 
     session.flash('success', "Poll created successfully! Share the URL with you're fwends!")
     return response.redirect(`/poll/${poll.id}`)
   }
 
-  async show({ params, view, session }: HttpContext) {
-    const poll: Poll = await Poll.query()
-      .where('id', params.id)
-      .preload('options', (query) => {
-        query.preload('vote')
-      })
-      .firstOrFail()
+  async show({ params, view, request }: HttpContext) {
+    const { poll, optionsWithPercentage } = await PollService.handlePollShow(params)
 
-    const totalVotes: number = poll.options.reduce(
-      (sum, option) => sum + (option.vote?.count ?? 0),
-      0
-    )
-
-    const optionsWithPercentage = poll.options.map((option) => {
-      const count: number = option.vote?.count ?? 0
-      const percentage: number = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
-
-      return {
-        id: option.id,
-        name: option.name,
-        count,
-        percentage,
-      }
-    })
-
-    session.flash('success', 'Poll created successfully!')
     return view.render('pages/show', {
       poll: {
         id: poll.id,
         name: poll.name,
+        createdAt: poll.createdAt ? poll.createdAt.toFormat('dd-MM-yyyy HH:mm:ss') : 'N/A',
         options: optionsWithPercentage,
+        owner: await PollService.valPollOwner(poll.ownerUuid, request.cookie('owner_uuid')),
       },
     })
   }
 
-  async vote({ params, session, response, request }: HttpContext) {
-    const { pollId, optionId } = params
+  async delete({ params, response, request }: HttpContext) {
+    await PollService.handleDelete(params, response, request)
 
-    const newVote: Vote = await Vote.findByOrFail('id', optionId)
-    const previousOptionId = request.cookie(`voted_poll_${pollId}`)
+    //    session.flash('notification', {
+    //      type: 'success',
+    //      message: 'Poll deleted!',
+    //    })
 
-    if (previousOptionId) {
-      if (Number.parseInt(previousOptionId) === Number.parseInt(optionId)) {
-        session.flash('error', 'You already voted for this option.')
-        return response.redirect().back()
+    return response.redirect('/')
+  }
+
+  async vote({ params, response, request }: HttpContext) {
+    try {
+      const result = await PollService.handleVote(params.pollId, params.optionId, response, request)
+
+      if (!result) {
+        return response.status(204)
       }
 
-      const previousVote = await Vote.find(previousOptionId)
-      if (previousVote) {
-        previousVote.count = Math.max(0, previousVote.count - 1)
-        await previousVote.save()
-      }
-    }
+      const { poll, totalVotes, optionsWithPercentage } = result
 
-    newVote.count += 1
-    await newVote.save()
-
-    // TODO: Fix duplicate code
-    const poll: Poll = await Poll.query()
-      .where('id', pollId)
-      .preload('options', (query) => {
-        query.preload('vote')
+      return response.status(200).json({
+        pollId: params.pollId,
+        pollName: poll.name,
+        totalVotes,
+        optionId: params.optionId,
+        options: optionsWithPercentage,
       })
-      .firstOrFail()
-
-    const totalVotes: number = poll.options.reduce(
-      (sum, option) => sum + (option.vote?.count ?? 0),
-      0
-    )
-
-    const optionsWithPercentage = poll.options.map((option) => {
-      const count: number = option.vote?.count ?? 0
-      const percentage: number = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
-
-      return {
-        id: option.id,
-        name: option.name,
-        count,
-        percentage,
+    } catch (error) {
+      if (error.message === 'Too many votes from this IP') {
+        return response.status(429).json({ message: error.message })
       }
-    })
 
-    transmit.broadcast('poll-updated', {
-      pollId,
-      pollName: poll.name,
-      totalVotes,
-      options: optionsWithPercentage,
-    })
+      if (error.code === 'E_ROW_NOT_FOUND') {
+        return response.status(404).json({ message: 'Poll or option not found' })
+      }
 
-    response.cookie(`voted_poll_${pollId}`, optionId, {
-      httpOnly: true,
-      maxAge: '7d',
-    })
-
-    session.flash('success', 'Your vote has been updated!')
-    return response.json({
-      pollId,
-      pollName: poll.name,
-      totalVotes,
-      options: optionsWithPercentage,
-    })
+      return response.status(500).json({ message: 'Unexpected error occurred' })
+    }
   }
 }
